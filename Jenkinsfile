@@ -16,7 +16,7 @@ pipeline {
     stages {
         stage('Checkout Version Control') {
             steps {
-                script {
+                dir('terraform') {
                     checkout([$class: 'GitSCM', branches: [[name: '*/main']], userRemoteConfigs: [[credentialsId: 'Github-Integration', url: 'https://github.com/cloudcastle443/EKS-Cluster-Terraform.git']]])
                 }
             }
@@ -24,7 +24,7 @@ pipeline {
 
         stage('Terraform Initialization') {
             steps {
-                dir('EKS-Cluster-Terraform') {
+                dir('terraform') {
                     withCredentials([string(credentialsId: 'aws_access_key_id', variable: 'AWS_ACCESS_KEY_ID'), 
                                      string(credentialsId: 'aws_secret_access_key', variable: 'AWS_SECRET_ACCESS_KEY')]) {
                         sh 'terraform init'
@@ -35,8 +35,8 @@ pipeline {
 
         stage('Terraform Action Selector') {
             steps {
-                script {
-                    dir('EKS-Cluster-Terraform') {
+                dir('terraform') {
+                    script {
                         if (params.TERRAFORM_ACTION == 'apply') {
                             sh 'terraform apply -auto-approve'
                         } else if (params.TERRAFORM_ACTION == 'destroy') {
