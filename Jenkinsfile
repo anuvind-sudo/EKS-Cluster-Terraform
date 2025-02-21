@@ -9,16 +9,18 @@ pipeline {
     environment {
         AWS_ACCESS_KEY_ID     = credentials('aws_access_key_id')
         AWS_SECRET_ACCESS_KEY = credentials('aws_secret_access_key')
-        AWS_DEFAULT_REGION    = 'us-east-1'
-        TF_VAR_aws_region     = 'us-east-1'
+        AWS_DEFAULT_REGION    = 'ap-south-1'
+        TF_VAR_aws_region     = 'ap-south-1'
     }
 
     stages {
         stage('Checkout Version Control') {
             steps {
                 dir('terraform') {
-                    checkout([$class: 'GitSCM', branches: [[name: '*/main']], userRemoteConfigs: [[credentialsId: 'Github-Integration', url: 'https://github.com/cloudcastle443/EKS-Cluster-Terraform.git']]])
-                }
+
+     
+               checkout scmGit(branches: [[name: '*/main']], extensions: [], userRemoteConfigs: [[credentialsId: 'githubintergation', url: 'https://github.com/anuvind-sudo/EKS-Cluster-Terraform.git']])
+                  }
             }
         }
 
