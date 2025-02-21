@@ -17,10 +17,12 @@ pipeline {
         stage('Checkout Version Control') {
             steps {
                 dir('terraform') {
-
-     
-               checkout scmGit(branches: [[name: '*/main']], extensions: [], userRemoteConfigs: [[credentialsId: 'githubintergation', url: 'https://github.com/anuvind-sudo/EKS-Cluster-Terraform.git']])
-                  }
+                    checkout scmGit(
+                        branches: [[name: '*/main']],
+                        extensions: [],
+                        userRemoteConfigs: [[credentialsId: 'githubintergation', url: 'https://github.com/anuvind-sudo/EKS-Cluster-Terraform.git']]
+                    )
+                }
             }
         }
 
@@ -39,14 +41,18 @@ pipeline {
             steps {
                 dir('terraform') {
                     script {
-                        if (params.TERRAFORM_ACTION == 'apply') {
-                            sh 'terraform apply -auto-approve'
-                        } else if (params.TERRAFORM_ACTION == 'destroy') {
-                            sh 'terraform destroy -auto-approve'
-                        } else if (params.TERRAFORM_ACTION == 'plan') {
-                            sh 'terraform plan'
-                        } else {
-                            error "Invalid Terraform action selected: ${params.TERRAFORM_ACTION}"
+                        switch (params.TERRAFORM_ACTION) {
+                            case 'apply':
+                                sh 'terraform apply -auto-approve'
+                                break
+                            case 'destroy':
+                                sh 'terraform destroy -auto-approve'
+                                break
+                            case 'plan':
+                                sh 'terraform plan'
+                                break
+                            default:
+                                error "Invalid Terraform action selected: ${params.TERRAFORM_ACTION}"
                         }
                     }
                 }
@@ -56,8 +62,10 @@ pipeline {
 
     post {
         always {
-            // Clean up workspace after pipeline execution
-            cleanWs()
+            // Wrap cleanup in node block to ensure workspace context is available
+            node {
+                cleanWs()
+            }
         }
     }
 
